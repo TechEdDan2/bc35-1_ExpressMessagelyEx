@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
 const Message = require("../models/message");
+const ExpressError = require("../expressError");
 
 /** GET /:id - get detail of message.
  *
@@ -15,6 +16,14 @@ const Message = require("../models/message");
  * Make sure that the currently-logged-in users is either the to or from user.
  *
  **/
+router.get("/:id", async (req, res, next) => {
+    try {
+        const message = await Message.get(req.params.id);
+        return res.json({ message });
+    } catch (e) {
+        return next(new ExpressError("Message not found", 404));
+    }
+});
 
 
 /** POST / - post message.
@@ -23,14 +32,35 @@ const Message = require("../models/message");
  *   {message: {id, from_username, to_username, body, sent_at}}
  *
  **/
+router.post("/", async (req, res, next) => {
+    try {
+        if (!from_username || !to_username || !body) {
+            throw new ExpressError("All fields required", 400);
+        }
+        const { from_username, to_username, body } = req.body;
+        const message = await Message.create(from_username, to_username, body);
+        return res.json({ message });
+
+    } catch (e) {
+        return next(new ExpressError(`Couldn't create message: ${e}`, 400));
+    }
+});
 
 
 /** POST/:id/read - mark message as read:
  *
  *  => {message: {id, read_at}}
  *
- * Make sure that the only the intended recipient can mark as read.
+ * Make sure that only the intended recipient can mark as read.
  *
  **/
+router.post("/:id/read", async (req, res, next) => {
+    try {
+
+    } catch (e) {
+        return next(new ExpressError(""))
+    }
+});
+
 
 module.exports = router;
