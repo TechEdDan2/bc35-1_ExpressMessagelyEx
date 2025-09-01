@@ -14,17 +14,29 @@ class User {
    */
 
   static async register({ username, password, first_name, last_name, phone }) {
-    const result = await db.query(
-      `INSERT INTO users( 
+    try {
+      //hash password
+      const hashedPW = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
+
+      const result = await db.query(
+        `INSERT INTO users( 
         username, 
         password, 
         first_name, 
         last_name, 
-        phone)
-      VALUES ($1, $2, $3, $4, $5, current_timestamp, current_timestamp) RETURNING username, password, first_name, last_name, phone1`,
-      [username, password, first_name, last_name, phone]
-    );
-    return result.rows[0];
+        phone,
+        join_at,
+        last_login_at)
+      VALUES ($1, $2, $3, $4, $5, current_timestamp, current_timestamp) RETURNING username, password, first_name, last_name, phone`,
+        [username, hashedPW, first_name, last_name, phone]
+      );
+      return result.rows[0];
+
+    } catch (e) {
+      throw new ExpressError(`Error registering new user: ${e}`, 501);
+
+    }
+
   }
 
   /** Authenticate: is this username/password valid? Returns boolean. */
@@ -66,7 +78,7 @@ class User {
    * [{username, first_name, last_name, phone}, ...] */
 
   static async all() {
-    const result = db.query(
+    const result = await db.query(
       `SELECT username, first_name, last_name, phone 
       FROM users 
       ORDER BY username`);

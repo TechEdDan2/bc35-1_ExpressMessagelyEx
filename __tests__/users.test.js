@@ -2,6 +2,9 @@ const db = require("../db");
 const User = require("../models/user");
 const Message = require("../models/message");
 
+beforeEach(async () => {
+  await db.query("DELETE FROM users");
+})
 
 describe("Test User class", function () {
   beforeEach(async function () {
@@ -33,7 +36,7 @@ describe("Test User class", function () {
     let isValid = await User.authenticate("test", "password");
     expect(isValid).toBeTruthy();
 
-    isValid =  await User.authenticate("test", "xxx");
+    isValid = await User.authenticate("test", "xxx");
     expect(isValid).toBeFalsy();
   });
 
@@ -136,6 +139,6 @@ describe("Test messages part of User class", function () {
   });
 });
 
-afterAll(async function() {
+afterAll(async function () {
   await db.end();
 });
