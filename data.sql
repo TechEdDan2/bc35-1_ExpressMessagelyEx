@@ -8,7 +8,7 @@ DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS messages;
 
 CREATE TABLE users (
-    username text PRIMARY KEY,
+    username text PRIMARY KEY NOT NULL UNIQUE,
     password text NOT NULL,
     first_name text NOT NULL,
     last_name text NOT NULL,
