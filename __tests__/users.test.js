@@ -4,6 +4,7 @@ const Message = require("../models/message");
 
 beforeEach(async () => {
   await db.query("DELETE FROM users");
+  // await db.query("DELETE FROM messages");
 })
 
 describe("Test User class", function () {
