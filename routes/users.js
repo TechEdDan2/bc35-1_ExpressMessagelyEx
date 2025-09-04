@@ -2,14 +2,14 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
 const ExpressError = require("../expressError");
-const { ensureCorrectUser, ensureLoggedIn } = require("../middleware/auth");
+const { ensureCorrectUser, ensureLoggedIn, authenticateJWT } = require("../middleware/auth");
 
 /** GET / - get list of users.
  *
  * => {users: [{username, first_name, last_name, phone}, ...]}
  *
  **/
-router.get("/", async (req, res, next) => {
+router.get("/", authenticateJWT, ensureLoggedIn, async (req, res, next) => {
     try {
         const users = await User.all();
         return res.json({ users });
@@ -24,7 +24,7 @@ router.get("/", async (req, res, next) => {
  * => {user: {username, first_name, last_name, phone, join_at, last_login_at}}
  *
  **/
-router.get("/:username", ensureCorrectUser, async (req, res, next) => {
+router.get("/:username", authenticateJWT, ensureCorrectUser, async (req, res, next) => {
     try {
         const user = await User.get(req.params.username);
         return res.json({ user });

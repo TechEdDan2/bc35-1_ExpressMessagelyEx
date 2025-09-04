@@ -10,6 +10,7 @@ function authenticateJWT(req, res, next) {
   try {
     const tokenFromBody = req.body._token;
     const payload = jwt.verify(tokenFromBody, SECRET_KEY);
+    console.log("payload:", payload);
     req.user = payload; // create a current user
     return next();
   } catch (err) {

@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require("../models/user");
 const Message = require("../models/message");
 const ExpressError = require("../expressError");
+const { ensureCorrectUser, ensureLoggedIn, authenticateJWT } = require("../middleware/auth");
 
 /** GET /:id - get detail of message.
  *
@@ -16,7 +17,7 @@ const ExpressError = require("../expressError");
  * Make sure that the currently-logged-in users is either the to or from user.
  *
  **/
-router.get("/:id", async (req, res, next) => {
+router.get("/:id", authenticateJWT, ensureCorrectUser, async (req, res, next) => {
     try {
         const message = await Message.get(req.params.id);
         return res.json({ message });
@@ -34,11 +35,13 @@ router.get("/:id", async (req, res, next) => {
  **/
 router.post("/", async (req, res, next) => {
     try {
+        const { from_username, to_username, body } = req.body;
+        console.log(req.body);
         if (!from_username || !to_username || !body) {
             throw new ExpressError("All fields required", 400);
         }
-        const { from_username, to_username, body } = req.body;
-        const message = await Message.create(from_username, to_username, body);
+
+        const message = await Message.create({ from_username, to_username, body });
         return res.json({ message });
 
     } catch (e) {
@@ -56,6 +59,9 @@ router.post("/", async (req, res, next) => {
  **/
 router.post("/:id/read", async (req, res, next) => {
     try {
+        const message = await Message.markRead(req.params.id);
+        return res.json({ message });
+
 
     } catch (e) {
         return next(new ExpressError(""))
